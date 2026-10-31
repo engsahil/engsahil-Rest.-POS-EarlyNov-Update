@@ -1,0 +1,220 @@
+/* ============================================================
+   Design tokens — single source of truth for the visual system.
+
+   Theme: "Light Clean & Fresh" (v5.1.9).
+   White cards on a subtle mint-tinted off-white background with a
+   deep restaurant green for primary actions. Colour is reserved for
+   actions, selected states, status and small accents.
+
+   The primitive names below are the historical ones (cream/sand/
+   taupe/ink/bronze). They are kept so module stylesheets that
+   reference them keep working, but every value now belongs to the
+   Light Clean & Fresh palette.
+   ============================================================ */
+
+:root {
+  /* --- Neutral primitives --- */
+  --c-white: #ffffff;
+  --c-cream-50: #ffffff;
+  --c-cream-100: #f7faf8; /* page background */
+  --c-cream-200: #f0f5f2; /* muted surface */
+  --c-cream-300: #dce7e1; /* border */
+  --c-sand-300: #cfded7;
+  --c-sand-400: #b9ccc3;
+  /* Muted text: 4.6:1 or better on every surface above. */
+  --c-taupe-300: #cfe0d8; /* used for hairlines and inactive dots */
+  --c-taupe-400: #5a6b62; /* secondary text */
+  --c-taupe-500: #5a6b62;
+  --c-taupe-600: #4a5a52;
+  --c-ink-700: #2f4038;
+  --c-ink-800: #172923;
+  --c-ink-900: #10201a;
+
+  /* --- Accent primitives (restaurant green) --- */
+  --c-green-50: #f1faf5;
+  --c-green-100: #e4f4ec;
+  --c-green-300: #9fd2bb;
+  --c-green-400: #25845f;
+  --c-green-500: #1c7a56;
+  --c-green-600: #176b4d;
+  --c-green-700: #12573e;
+  --c-green-900: #0d3f2d;
+
+  /* --- Status primitives --- */
+  --c-success-500: #168653;
+  --c-success-100: #e2f5ea;
+  --c-amber-500: #a8741a;
+  --c-amber-100: #fbf1dd;
+  --c-red-500: #c03636;
+  --c-red-100: #fbeaea;
+  --c-blue-500: #2a6690;
+  --c-blue-100: #e8f1f7;
+
+  /* --- Semantic surfaces --- */
+  --color-bg: var(--c-cream-100);
+  --color-surface: var(--c-white);
+  --color-surface-alt: #fbfdfc;
+  --color-surface-sunken: var(--c-cream-200);
+  --color-surface-raised: var(--c-white);
+  --color-surface-muted: #f0f5f2;
+
+  --color-border: var(--c-cream-300);
+  --color-border-subtle: #e8f0ec;
+  --color-border-strong: var(--c-sand-300);
+
+  /* --- Semantic text --- */
+  --color-text: var(--c-ink-800);
+  --color-text-secondary: var(--c-ink-700);
+  --color-text-muted: var(--c-taupe-400);
+  --color-text-faint: var(--c-taupe-500);
+  --color-text-inverse: #ffffff;
+
+  /* --- Interactive --- */
+  /*
+   * Primary actions are deep restaurant green. White text on green-600
+   * clears WCAG AA comfortably (6.6:1); green-700 is darker for hover.
+   */
+  --color-primary: var(--c-green-600);
+  --color-primary-hover: var(--c-green-700);
+  --color-primary-contrast: #ffffff;
+
+  --color-accent: var(--c-green-500);
+  --color-accent-hover: var(--c-green-600);
+  --color-accent-soft: var(--c-green-100);
+  --color-accent-soft-strong: #d5ebdf;
+
+  --color-hover: #f0f6f3;
+  --color-active: #e4f4ec;
+  --color-selected: #f1faf5;
+
+  /* --- Status --- */
+  --color-success: var(--c-success-500);
+  --color-success-soft: var(--c-success-100);
+  --color-warning: var(--c-amber-500);
+  --color-warning-soft: var(--c-amber-100);
+  --color-danger: var(--c-red-500);
+  --color-danger-soft: var(--c-red-100);
+  --color-info: var(--c-blue-500);
+  --color-info-soft: var(--c-blue-100);
+
+  /* --- Accent support colours (charts, status, highlights) --- */
+  --color-accent-orange: #f59e0b;
+  --color-accent-blue: #2583d8;
+  --color-accent-gold: #d9a441;
+  --color-accent-orange-soft: #fdf3e3;
+  --color-accent-blue-soft: #e8f2fc;
+  --color-accent-gold-soft: #faf3e3;
+
+  /* Chart series: ordered, colour-blind-safe against the light surfaces. */
+  --chart-1: #176b4d;
+  --chart-2: #2583d8;
+  --chart-3: #f59e0b;
+  --chart-4: #25845f;
+  --chart-5: #d9a441;
+  --chart-grid: #e8f0ec;
+
+  --color-focus-ring: var(--c-green-500);
+  --color-overlay: rgb(13 32 26 / 38%);
+
+  /* --- Typography ---
+     The existing system UI stack is preserved: it is already available on
+     every target platform, renders receipts reliably and needs no download.
+  */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Inter',
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-2xs: 0.6875rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.875rem;
+  --fs-lg: 1rem;
+  --fs-xl: 1.125rem;
+  --fs-2xl: 1.375rem;
+  --fs-3xl: 1.75rem;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  --lh-tight: 1.25;
+  --lh-snug: 1.4;
+  --lh-normal: 1.6;
+
+  --tracking-tight: -0.014em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+  --tracking-caps: 0.08em;
+
+  /* --- Spacing (4px base) --- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-7: 1.75rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-20: 5rem;
+
+  /* --- Radii --- */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* --- Elevation (very restrained, green-tinted) --- */
+  --shadow-xs: 0 1px 2px rgb(16 32 26 / 4%);
+  --shadow-sm:
+    0 1px 2px rgb(16 32 26 / 5%), 0 1px 3px rgb(16 32 26 / 3%);
+  --shadow-md:
+    0 2px 4px rgb(16 32 26 / 4%), 0 4px 12px rgb(16 32 26 / 6%);
+  --shadow-lg:
+    0 4px 8px rgb(16 32 26 / 5%), 0 12px 32px rgb(16 32 26 / 9%);
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-instant: 90ms;
+  --dur-fast: 150ms;
+  --dur-normal: 220ms;
+  --dur-slow: 320ms;
+
+  /* --- Layout --- */
+  --layout-sidebar-w: 224px;
+  --layout-rail-w: 80px;
+  --layout-tabbar-h: 62px;
+  --layout-content-max: 1360px;
+
+  /* --- Z-index --- */
+  --z-base: 0;
+  --z-sticky: 100;
+  --z-nav: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+
+  /* --- Safe areas --- */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* --- Touch targets --- */
+  --tap-min: 44px;
+
+  color-scheme: light;
+}
+
+/* --- Breakpoint reference (kept consistent app-wide) ---
+   mobile:  < 640px
+   tablet:  640px – 1023px
+   desktop: >= 1024px
+--------------------------------------------------------- */

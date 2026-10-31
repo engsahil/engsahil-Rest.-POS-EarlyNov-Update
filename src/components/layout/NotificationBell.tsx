@@ -1,0 +1,172 @@
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTE_PATHS } from '@/app/routes';
+import { Button} from '@/components/ui';
+import { AlertIcon, BellIcon, CheckIcon } from '@/components/ui/Icons';
+import { useNotifications } from '@/hooks/useNotifications';
+import { formatRelativeTime } from '@/utils/date';
+import type { NotificationRecord } from '@/types/domain';
+import styles from './NotificationBell.module.css';
+
+function severityClass(notification: NotificationRecord): string {
+  if (notification.severity === 'critical') return styles.critical ?? '';
+  if (notification.severity === 'warning') return styles.warning ?? '';
+  return styles.info ?? '';
+}
+
+/**
+ * Header bell with unread badge and recent notifications.
+ *
+ * The unread count is derived from persisted records, so it is correct after
+ * a refresh. Visible entries are marked read when they enter the panel’s
+ * viewport; clicking an item also opens its linked module.
+ */
+export function NotificationBell() {
+  const navigate = useNavigate();
+  const { notifications, unreadCount, markRead, markAllRead, markingAllRead, loading, error, reload } = useNotifications(30);
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const pendingRead = useRef(new Set<string>());
+
+  // Only rows intersecting the scroll viewport have actually been viewed.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!open || !list) return;
+    const markVisible = (row: HTMLElement) => {
+      const id = row.dataset.unreadId;
+      if (!id || pendingRead.current.has(id)) return;
+      pendingRead.current.add(id);
+      void markRead(id).catch(() => {}).finally(() => pendingRead.current.delete(id));
+    };
+    if (typeof IntersectionObserver === 'undefined') {
+      const check = () => {
+        const bounds = list.getBoundingClientRect();
+        list.querySelectorAll<HTMLElement>('[data-unread-id]').forEach((row) => {
+          const rect = row.getBoundingClientRect();
+          const visible = Math.max(0, Math.min(rect.bottom, bounds.bottom) - Math.max(rect.top, bounds.top));
+          if (rect.height > 0 && visible / rect.height >= 0.5) markVisible(row);
+        });
+      };
+      list.addEventListener('scroll', check, { passive: true });
+      window.addEventListener('resize', check);
+      check();
+      return () => { list.removeEventListener('scroll', check); window.removeEventListener('resize', check); };
+    }
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) markVisible(entry.target as HTMLElement);
+      }
+    }, { root: list, threshold: 0.5 });
+    list.querySelectorAll('[data-unread-id]').forEach((row) => observer.observe(row));
+    return () => observer.disconnect();
+  }, [open, notifications, markRead]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!wrapperRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  function openNotification(notification: NotificationRecord) {
+    // One click owns the read action; navigation must not wait for a second click.
+    void markRead(notification.id);
+    setOpen(false);
+    if (notification.link) navigate(notification.link);
+  }
+
+  return (
+    <div className={styles.wrapper} ref={wrapperRef}>
+      <button
+        type="button"
+        className={styles.bell}
+        aria-label={
+          unreadCount > 0
+            ? `Notifications, ${unreadCount} unread`
+            : 'Notifications'
+        }
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={() => setOpen((value) => !value)}
+        data-tour="notifications"
+      >
+        <BellIcon width={19} height={19} />
+        {unreadCount > 0 ? (
+          <span className={styles.badge} aria-hidden="true">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        ) : null}
+      </button>
+
+      {open ? (
+        <div className={styles.panel} role="dialog" aria-label="Notifications">
+          <header className={styles.head}>
+            <span className={styles.title}>Notifications</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void markAllRead()}
+              disabled={unreadCount === 0 || markingAllRead}
+            >
+              Mark all read
+            </Button>
+          </header>
+
+          {error ? <div className={styles.empty} role="alert">{error} <Button size="sm" variant="secondary" onClick={() => void reload()}>Retry</Button></div> : null}
+          {loading && notifications.length === 0 ? <p className={styles.empty}>Loading notifications…</p> : notifications.length === 0 ? (
+            <p className={styles.empty}>No notifications yet.</p>
+          ) : (
+            <ul className={styles.list} ref={listRef}>
+              {notifications.map((notification) => (
+                <li key={notification.id} data-unread-id={notification.readAt ? undefined : notification.id}>
+                  <button
+                    type="button"
+                    className={`${styles.item} ${notification.readAt ? '' : styles.unread}`}
+                    onClick={() => openNotification(notification)}
+                    aria-label={`${notification.readAt ? 'Read' : 'Unread'} notification: ${notification.title}`}
+                  >
+                    <span className={`${styles.dot} ${severityClass(notification)}`} aria-hidden="true">
+                      {notification.severity === 'critical' ? (
+                        <AlertIcon width={13} height={13} />
+                      ) : notification.readAt ? (
+                        <CheckIcon width={12} height={12} />
+                      ) : null}
+                    </span>
+                    <span className={styles.itemBody}>
+                      <span className={styles.itemTitle}>{notification.title}</span>
+                      {notification.body ? (
+                        <span className={styles.itemText}>{notification.body}</span>
+                      ) : null}
+                      <span className={styles.itemTime}>
+                        {formatRelativeTime(notification.createdAt)}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <footer className={styles.preferences}>
+            <span>Only viewed messages become read.</span>
+            <Button size="sm" variant="ghost" onClick={() => {
+              setOpen(false);
+              navigate(ROUTE_PATHS.admin, { state: { section: 'settings' } });
+            }}>Preferences</Button>
+          </footer>
+        </div>
+      ) : null}
+    </div>
+  );
+}
